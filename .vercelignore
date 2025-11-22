@@ -1,0 +1,12 @@
+# Prisma
+dev.db
+dev.db-journal
+*.db
+*.db-journal
+
+# Prisma Studio
+.prisma
+
+# Local env files
+.env.local
+.env*.local
