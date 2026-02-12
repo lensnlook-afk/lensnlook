@@ -52,6 +52,12 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function deleteProductAction(id: string) {
-    await deleteProduct(id);
-    revalidatePath('/admin/products');
+    try {
+        await deleteProduct(id);
+        revalidatePath('/admin/products');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to delete product:', error);
+        return { success: false, error: 'Failed to delete product' };
+    }
 }

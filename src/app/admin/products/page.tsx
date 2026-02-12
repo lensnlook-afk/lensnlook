@@ -3,6 +3,7 @@ import { deleteProductAction } from '../actions';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DeleteProductButton } from './DeleteProductButton';
 
 export default async function ProductList() {
     const products = await getProducts();
@@ -94,14 +95,7 @@ export default async function ProductList() {
                                             >
                                                 <Pencil className="w-5 h-5" />
                                             </Link>
-                                            <form action={deleteProductAction.bind(null, product.id)}>
-                                                <button
-                                                    type="submit"
-                                                    className="p-4 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all shadow-sm active:scale-95"
-                                                >
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            </form>
+                                            <DeleteProductButton id={product.id} />
                                         </div>
                                     </td>
                                 </tr>
