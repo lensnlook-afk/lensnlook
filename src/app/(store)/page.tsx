@@ -1,11 +1,23 @@
 import Link from 'next/link';
-import { ArrowRight, Star, ShieldCheck, Truck, RefreshCw, Zap, Glasses, Sun, Monitor, Eye, Layers, TrendingUp, Award, Clock } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, Truck, RefreshCw, Zap, Glasses, Sun, Monitor, Eye, Layers, TrendingUp, Award, Clock, ShoppingCart } from 'lucide-react';
 import { getProducts } from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
 
 export default async function HomePage() {
   const products = await getProducts();
   const featuredProducts = products.slice(0, 4);
+
+  // Derive dynamic categories from the database
+  const categories = Array.from(new Set(products.map(p => p.category)))
+    .filter(Boolean)
+    .map(name => {
+      const categoryProduct = products.find(p => p.category === name);
+      return {
+        name,
+        image: categoryProduct?.image,
+        count: products.filter(p => p.category === name).length
+      };
+    });
 
   return (
     <div className="bg-background min-h-screen">
@@ -77,103 +89,90 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories Section - Modern Grid */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-center md:text-left">
-            <div>
-              <span className="text-accent font-bold uppercase tracking-widest text-sm block mb-4">The Selection</span>
-              <h2 className="text-4xl md:text-6xl font-bold">Curated Styles</h2>
-            </div>
-            <Link href="/products" className="group flex items-center space-x-3 text-lg font-bold text-primary px-8 py-3 bg-primary/10 rounded-full hover:bg-primary hover:text-white transition-all">
-              <span>View Full Store</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[600px]">
-            {/* Large Category Item */}
-            <Link
-              href="/products?category=Eyeglasses"
-              className="md:col-span-7 relative group rounded-3xl overflow-hidden shadow-xl"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=800&q=80"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
-                <h3 className="text-4xl font-bold text-white mb-2">Eyeglasses</h3>
-                <p className="text-gray-300 text-lg">Sophistication for every face shape.</p>
+      {/* Categories Section - Dynamic from Database */}
+      {categories.length > 0 && (
+        <section className="py-24 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-center md:text-left">
+              <div>
+                <span className="text-accent font-bold uppercase tracking-widest text-sm block mb-4">The Selection</span>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter">Curated Styles.</h2>
               </div>
-            </Link>
-
-            {/* Right Column Grid */}
-            <div className="md:col-span-5 grid grid-rows-2 gap-6">
-              <Link
-                href="/products?category=Sunglasses"
-                className="relative group rounded-3xl overflow-hidden shadow-xl"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&q=80"
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8">
-                  <h3 className="text-2xl font-bold text-white">Sunglasses</h3>
-                </div>
+              <Link href="/products" className="group flex items-center space-x-3 text-lg font-bold text-primary px-8 py-3 bg-primary/10 rounded-full hover:bg-primary hover:text-white transition-all">
+                <span>View Full Store</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <div className="grid grid-cols-2 gap-6">
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {categories.map((cat, idx) => (
                 <Link
-                  href="/products?category=Contact Lenses"
-                  className="relative group rounded-3xl overflow-hidden shadow-xl"
+                  key={cat.name}
+                  href={`/products?category=${cat.name}`}
+                  className="group relative h-[400px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-2 border border-border/50"
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=800&q=80"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale group-hover:grayscale-0"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
-                    <h3 className="text-xl font-bold text-white leading-tight">Contacts</h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-10">
+                    <span className="text-primary text-xs font-black uppercase tracking-widest mb-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full self-start">
+                      {cat.count} Pieces
+                    </span>
+                    <h3 className="text-3xl font-black text-white tracking-tighter">{cat.name}.</h3>
+                    <p className="text-white/60 text-sm font-medium mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Explore artisan collection &rarr;</p>
                   </div>
                 </Link>
-                <Link
-                  href="/products?category=Computer Glasses"
-                  className="relative group rounded-3xl overflow-hidden shadow-xl bg-secondary flex flex-col items-center justify-center p-6 text-center"
-                >
-                  <Monitor className="w-12 h-12 text-primary mb-4" />
-                  <h3 className="text-xl font-bold text-white leading-tight">Computer Glasses</h3>
-                </Link>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Trending Now - Horizontal Scroll on Mobile */}
-      <section className="py-24 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-16">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-primary/10 rounded-2xl">
-                <TrendingUp className="w-8 h-8 text-primary" />
+      {/* Trending Now */}
+      {featuredProducts.length > 0 && (
+        <section className="py-24 bg-card/50 backdrop-blur-sm border-y border-border/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-16">
+              <div className="flex items-center space-x-4">
+                <div className="p-4 bg-primary/10 rounded-[1.5rem] shadow-xl shadow-primary/5">
+                  <TrendingUp className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tighter">New Arrivals.</h2>
               </div>
-              <h2 className="text-3xl md:text-5xl font-bold">Trending Highlights</h2>
+              <Link href="/products" className="text-sm font-black uppercase tracking-widest text-primary hover:underline">See All</Link>
             </div>
-            <div className="hidden sm:flex space-x-2">
-              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
-                <ArrowRight className="w-5 h-5 rotate-180" />
-              </div>
-              <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors">
-                <ArrowRight className="w-5 h-5" />
-              </div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Empty State if no products at all */}
+      {products.length === 0 && (
+        <section className="py-40 text-center px-6">
+          <div className="max-w-xl mx-auto space-y-8 animate-in fade-in zoom-in duration-1000">
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-primary/20">
+              <ShoppingCart className="w-10 h-10 text-primary" />
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter">Catalog Refresh.</h2>
+            <p className="text-muted-foreground text-lg font-medium leading-relaxed">
+              We are currently re-curating our global collection. Please return shortly to discover new dimensions of clarity.
+            </p>
+            <div className="pt-8">
+              <div className="inline-flex items-center space-x-4 px-6 py-3 bg-muted rounded-full">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest opacity-60">Status: Restocking Vault</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features - Premium Cards */}
       <section className="py-24 relative overflow-hidden">
@@ -185,53 +184,53 @@ export default async function HomePage() {
               { icon: RefreshCw, title: "Perfect Fit", desc: "Not satisfied? Return or exchange with zero questions asked in 14 days.", color: "text-orange-500" },
               { icon: Clock, title: "24/7 Support", desc: "Our vision experts are always available to guide your stylist journey.", color: "text-purple-500" },
             ].map((feature, idx) => (
-              <div key={idx} className="group p-8 rounded-3xl bg-secondary/5 border border-border hover:bg-background transition-all hover:shadow-2xl hover:scale-105 duration-500">
-                <div className={`w-14 h-14 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center mb-6 shadow-lg group-hover:rotate-6 transition-all`}>
-                  <feature.icon className={`w-7 h-7 ${feature.color}`} />
+              <div key={idx} className="group p-10 rounded-[2.5rem] bg-card border border-border hover:bg-background transition-all hover:shadow-2xl hover:scale-105 duration-500 shadow-xl shadow-black/[0.02]">
+                <div className={`w-16 h-16 rounded-2xl bg-white dark:bg-white/5 flex items-center justify-center mb-8 shadow-lg group-hover:rotate-6 transition-all border border-border/50`}>
+                  <feature.icon className={`w-8 h-8 ${feature.color}`} />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{feature.desc}</p>
+                <h3 className="text-2xl font-black tracking-tighter mb-4">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed font-medium">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Flagship Store - Visual Map Section */}
-      <section className="py-24 bg-secondary text-white relative">
+      {/* Flagship Store */}
+      <section className="py-24 bg-foreground text-background relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white/5 rounded-[3rem] overflow-hidden border border-white/10 p-4 md:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="p-8 md:p-12 space-y-10">
+          <div className="bg-white/[0.03] rounded-[4rem] overflow-hidden border border-white/5 p-4 md:p-12 backdrop-blur-md">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              <div className="space-y-12">
                 <div>
-                  <span className="text-accent text-sm font-bold uppercase tracking-[0.3em] mb-4 block">Store Experience</span>
-                  <h2 className="text-4xl md:text-6xl font-bold leading-tight">Find Your <br />Signature Look.</h2>
+                  <span className="text-primary text-xs font-black uppercase tracking-[0.4em] mb-6 block opacity-80">Physical Presence</span>
+                  <h2 className="text-5xl md:text-7xl font-black leading-tight tracking-tighter">Find Your <br />Signature.</h2>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-10">
                   {[
-                    { icon: "/icons/map.svg", title: "Flagship Destination", detail: "Banashankari Road, Badami, Karnataka 587201" },
-                    { icon: "/icons/phone.svg", title: "Direct Line", detail: "+91 7899200661" },
-                    { icon: "/icons/clock.svg", title: "Hours", detail: "Daily: 10:30 AM - 9:30 PM" }
+                    { title: "Flagship Destination", detail: "Banashankari Road, Badami, Karnataka 587201" },
+                    { title: "Direct Line", detail: "+91 7899200661" },
+                    { title: "Hours", detail: "Daily: 10:30 AM - 9:30 PM" }
                   ].map((info, idx) => (
-                    <div key={idx} className="flex gap-6 items-start">
-                      <div className="w-6 h-6 rounded-full bg-primary/20 flex-shrink-0 flex items-center justify-center mt-1">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                      </div>
+                    <div key={idx} className="flex gap-8 items-start group">
+                      <div className="w-1 h-12 bg-primary/20 rounded-full group-hover:bg-primary transition-colors duration-500" />
                       <div>
-                        <h4 className="font-bold text-lg text-white mb-1">{info.title}</h4>
-                        <p className="text-gray-400 font-medium">{info.detail}</p>
+                        <h4 className="font-black text-xl text-white tracking-tight mb-2 uppercase text-[10px] opacity-40">{info.title}</h4>
+                        <p className="text-white/80 font-bold text-lg">{info.detail}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <button className="w-full md:w-auto px-10 py-5 bg-primary text-white font-bold rounded-2xl hover:shadow-2xl hover:shadow-primary/30 transition-all active:scale-95">
-                  Get Directions
-                </button>
+                <div className="flex pt-4">
+                  <button className="px-12 py-6 bg-white text-black font-black rounded-3xl hover:bg-primary hover:text-white transition-all active:scale-95 shadow-2xl">
+                    Get Directions
+                  </button>
+                </div>
               </div>
 
-              <div className="h-[400px] md:h-[600px] rounded-[2rem] overflow-hidden shadow-inner grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-1000 border border-white/10">
+              <div className="h-[500px] md:h-[700px] rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-1000 border border-white/10 group grayscale hover:grayscale-0 relative">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3840.336436696354!2d75.6784682759027!3d15.91771068473836!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb887e8f9b98f2f%3A0x371e249fe0bf0021!2sLens%20N%20Look!5e0!3m2!1sen!2sin!4v1716355000000!5m2!1sen!2sin"
                   width="100%"
@@ -241,6 +240,7 @@ export default async function HomePage() {
                   loading="lazy"
                   className="bg-secondary"
                 ></iframe>
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent pointer-events-none transition-all" />
               </div>
             </div>
           </div>

@@ -3,8 +3,10 @@
 import { Product } from '@/lib/db';
 import { createProduct, updateProduct } from '@/app/admin/actions';
 import Link from 'next/link';
-import { ArrowLeft, Save, Upload, Image as ImageIcon, X } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { ArrowLeft, Save, Upload, Image as ImageIcon, X, Loader2, Sparkles, Box, DollarSign, Type, FileText } from 'lucide-react';
+import { useState, useRef, useTransition } from 'react';
+import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 interface ProductFormProps {
     product?: Product;
@@ -12,8 +14,8 @@ interface ProductFormProps {
 
 export default function ProductForm({ product }: ProductFormProps) {
     const isEditing = !!product;
-    const action = isEditing ? updateProduct.bind(null, product.id) : createProduct;
-
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
     const [imageUrl, setImageUrl] = useState(product?.image || '');
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,119 +46,140 @@ export default function ProductForm({ product }: ProductFormProps) {
         }
     };
 
+    async function handleSubmit(formData: FormData) {
+        startTransition(async () => {
+            if (isEditing) {
+                await updateProduct(product.id, formData);
+            } else {
+                await createProduct(formData);
+            }
+            router.push('/admin/products');
+            router.refresh();
+        });
+    }
+
     return (
-        <form action={action} className="max-w-4xl mx-auto space-y-8">
-            <div className="flex items-center justify-between sticky top-0 bg-gray-100 py-4 z-10">
-                <div className="flex items-center space-x-4">
+        <form action={handleSubmit} className="max-w-5xl mx-auto space-y-12 pb-24">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 sticky top-0 z-30 py-6 bg-background/80 backdrop-blur-xl border-b border-border/50 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="flex items-center space-x-6">
                     <Link
                         href="/admin/products"
-                        className="p-2 text-gray-500 hover:bg-white hover:shadow-sm rounded-full transition-all"
+                        className="p-4 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-2xl transition-all shadow-sm active:scale-95"
                     >
-                        <ArrowLeft className="w-5 h-5" />
+                        <ArrowLeft className="w-6 h-6" />
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800">
-                            {isEditing ? 'Edit Product' : 'New Product'}
+                        <div className="flex items-center space-x-2 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-1">
+                            <Sparkles className="w-3 h-3" />
+                            <span>Catalog Management</span>
+                        </div>
+                        <h1 className="text-4xl font-black text-foreground tracking-tighter">
+                            {isEditing ? 'Refine Masterpiece.' : 'Catalog New Piece.'}
                         </h1>
-                        <p className="text-sm text-gray-500">
-                            {isEditing ? 'Update product details' : 'Add a new item to inventory'}
-                        </p>
                     </div>
                 </div>
                 <button
                     type="submit"
-                    className="bg-teal-600 text-white px-6 py-2.5 rounded-lg flex items-center space-x-2 hover:bg-teal-700 transition-all shadow-md hover:shadow-lg font-medium"
+                    disabled={isPending || isUploading}
+                    className="bg-primary text-white px-10 py-5 rounded-2xl flex items-center space-x-3 hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 font-bold group disabled:opacity-50 disabled:cursor-wait"
                 >
-                    <Save className="w-4 h-4" />
-                    <span>Save Product</span>
+                    {isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6 group-hover:scale-110 transition-transform" />}
+                    <span>{isEditing ? 'Commit Changes' : 'Sanctify to Catalog'}</span>
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Main Info */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                        <h2 className="text-lg font-semibold text-gray-800 border-b pb-4">Basic Information</h2>
-
-                        <div className="space-y-2">
-                            <label htmlFor="name" className="text-sm font-medium text-gray-700">
-                                Product Name
-                            </label>
-                            <input
-                                type="text"
-                                id="name"
-                                name="name"
-                                required
-                                defaultValue={product?.name}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                                placeholder="e.g. Vincent Chase Wayfarer"
-                            />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                {/* Main Identity Info */}
+                <div className="lg:col-span-2 space-y-12">
+                    <div className="bg-card p-10 rounded-[3rem] border border-border shadow-2xl shadow-black/[0.02] space-y-10 relative overflow-hidden">
+                        <div className="flex items-center space-x-3 pb-6 border-b border-border/50">
+                            <Type className="w-5 h-5 text-primary" />
+                            <h2 className="text-xl font-black tracking-tighter uppercase">Visual Identity</h2>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label htmlFor="category" className="text-sm font-medium text-gray-700">
-                                    Category
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label htmlFor="name" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1">
+                                    Nomenclature / Name
                                 </label>
-                                <select
-                                    id="category"
-                                    name="category"
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
                                     required
-                                    defaultValue={product?.category}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all bg-white"
-                                >
-                                    <option value="">Select Category</option>
-                                    <option value="Eyeglasses">Eyeglasses</option>
-                                    <option value="Sunglasses">Sunglasses</option>
-                                    <option value="Contact Lenses">Contact Lenses</option>
-                                    <option value="Computer Glasses">Computer Glasses</option>
-                                </select>
+                                    defaultValue={product?.name}
+                                    className="w-full bg-muted/30 px-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-medium text-lg"
+                                    placeholder="e.g. Zenith Avant-Garde Gold"
+                                />
                             </div>
 
-                            <div className="space-y-2">
-                                <label htmlFor="price" className="text-sm font-medium text-gray-700">
-                                    Price (₹)
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2.5 text-gray-500">₹</span>
-                                    <input
-                                        type="number"
-                                        id="price"
-                                        name="price"
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-3">
+                                    <label htmlFor="category" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1">
+                                        Archetype / Category
+                                    </label>
+                                    <select
+                                        id="category"
+                                        name="category"
                                         required
-                                        min="0"
-                                        step="0.01"
-                                        defaultValue={product?.price}
-                                        className="w-full pl-8 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                                        placeholder="0.00"
-                                    />
+                                        defaultValue={product?.category}
+                                        className="w-full bg-muted/30 px-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-medium appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Select Archetype</option>
+                                        <option value="Eyeglasses">Eyeglasses</option>
+                                        <option value="Sunglasses">Sunglasses</option>
+                                        <option value="Contact Lenses">Contact Lenses</option>
+                                        <option value="Computer Glasses">Computer Glasses</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label htmlFor="price" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1">
+                                        Valuation (INR)
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground font-black">₹</span>
+                                        <input
+                                            type="number"
+                                            id="price"
+                                            name="price"
+                                            required
+                                            min="0"
+                                            step="0.01"
+                                            defaultValue={product?.price}
+                                            className="w-full bg-muted/30 pl-12 pr-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-black text-lg"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <label htmlFor="description" className="text-sm font-medium text-gray-700">
-                                Description / Caption
-                            </label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                rows={6}
-                                defaultValue={product?.description}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all resize-none"
-                                placeholder="Describe the product features, style, and benefits..."
-                            />
-                            <p className="text-xs text-gray-500 text-right">
-                                Write a catchy caption to attract customers.
-                            </p>
+                            <div className="space-y-3">
+                                <label htmlFor="description" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1 flex items-center space-x-2">
+                                    <FileText className="w-3 h-3" />
+                                    <span>Artistic Description</span>
+                                </label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    rows={5}
+                                    defaultValue={product?.description}
+                                    className="w-full bg-muted/30 px-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all resize-none font-medium leading-relaxed"
+                                    placeholder="Describe the craftsmanship and allure of this piece..."
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                        <h2 className="text-lg font-semibold text-gray-800 border-b pb-4">Inventory</h2>
-                        <div className="space-y-2">
-                            <label htmlFor="stock" className="text-sm font-medium text-gray-700">
-                                Stock Quantity
+                    <div className="bg-card p-10 rounded-[3rem] border border-border shadow-2xl shadow-black/[0.02] space-y-8">
+                        <div className="flex items-center space-x-3 pb-6 border-b border-border/50">
+                            <Box className="w-5 h-5 text-primary" />
+                            <h2 className="text-xl font-black tracking-tighter uppercase">Inventory Logistics</h2>
+                        </div>
+                        <div className="space-y-3">
+                            <label htmlFor="stock" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1">
+                                Stock Allocation
                             </label>
                             <input
                                 type="number"
@@ -165,77 +188,88 @@ export default function ProductForm({ product }: ProductFormProps) {
                                 required
                                 min="0"
                                 defaultValue={product?.stock}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                                placeholder="0"
+                                className="w-full bg-muted/30 px-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-black"
+                                placeholder="0 items available"
                             />
-                            <p className="text-xs text-gray-500">
-                                Set to 0 to mark as "Out of Stock".
+                            <p className="text-[10px] text-muted-foreground font-medium pl-1 italic">
+                                Set to zero for "Exhausted" status.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column - Image Upload */}
-                <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                        <h2 className="text-lg font-semibold text-gray-800 border-b pb-4">Product Image</h2>
+                {/* Aesthetic Preview & Asset Upload */}
+                <div className="space-y-12">
+                    <div className="bg-card p-10 rounded-[3rem] border border-border shadow-2xl shadow-black/[0.02] space-y-8 sticky top-[150px]">
+                        <div className="flex items-center justify-between pb-6 border-b border-border/50">
+                            <div className="flex items-center space-x-3">
+                                <ImageIcon className="w-5 h-5 text-primary" />
+                                <h2 className="text-xl font-black tracking-tighter uppercase">Visual Asset</h2>
+                            </div>
+                        </div>
 
                         <input type="hidden" name="image" value={imageUrl} />
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             <div
-                                className={`relative aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all overflow-hidden ${imageUrl ? 'border-teal-500 bg-gray-50' : 'border-gray-300 hover:border-teal-400 hover:bg-gray-50'
-                                    }`}
+                                className={cn(
+                                    "relative aspect-[4/5] rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center transition-all overflow-hidden group",
+                                    imageUrl ? "border-primary/50 bg-background shadow-inner" : "border-border hover:border-primary/30 hover:bg-primary/[0.02]"
+                                )}
                             >
                                 {imageUrl ? (
                                     <>
                                         <img
                                             src={imageUrl}
                                             alt="Preview"
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700 mix-blend-multiply dark:mix-blend-normal"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setImageUrl('')}
-                                            className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-md hover:bg-red-50 text-red-500 transition-colors"
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </button>
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <button
+                                                type="button"
+                                                onClick={() => setImageUrl('')}
+                                                className="p-4 bg-white text-red-500 rounded-full shadow-2xl hover:bg-red-50 transition-colors"
+                                            >
+                                                <X className="w-6 h-6" />
+                                            </button>
+                                        </div>
                                     </>
                                 ) : (
-                                    <div className="text-center p-6">
-                                        <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <ImageIcon className="w-6 h-6" />
+                                    <div className="text-center p-8 space-y-4">
+                                        <div className="w-20 h-20 bg-primary/5 text-primary rounded-full flex items-center justify-center mx-auto transition-transform group-hover:scale-110">
+                                            <Upload className="w-8 h-8" />
                                         </div>
-                                        <p className="text-sm font-medium text-gray-700">
-                                            {isUploading ? 'Uploading...' : 'No image selected'}
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Upload a high-quality image
-                                        </p>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-black uppercase tracking-widest text-foreground">
+                                                {isUploading ? 'Syncing...' : 'Missing Asset'}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground font-medium">
+                                                Tap to upload high-res piece
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
-                            </div>
-
-                            <div className="flex flex-col gap-3">
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    disabled={isUploading}
-                                    className="w-full py-2.5 px-4 bg-white border border-gray-200 hover:border-teal-500 hover:text-teal-600 text-gray-700 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
-                                >
-                                    <Upload className="w-4 h-4" />
-                                    {isUploading ? 'Uploading...' : 'Upload Image'}
-                                </button>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
+                                    className="absolute inset-0 w-full h-full cursor-pointer z-10"
+                                    aria-label="Upload Image"
                                 />
+                            </div>
 
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                            />
 
+                            <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Curator Note.</h4>
+                                <p className="text-[11px] text-muted-foreground font-medium leading-relaxed italic">
+                                    Product imagery is the soul of the catalog. Ensure transparent or clean backgrounds for maximum impact.
+                                </p>
                             </div>
                         </div>
                     </div>
