@@ -22,25 +22,42 @@ export default function ProductForm({ product }: ProductFormProps) {
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file) {
+            console.log('No file selected');
+            return;
+        }
 
+        console.log('Starting upload for:', file.name, file.type, file.size);
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
 
         try {
+            console.log('Sending upload request...');
             const res = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!res.ok) throw new Error('Upload failed');
-
+            console.log('Upload response status:', res.status);
             const data = await res.json();
+            console.log('Upload response data:', data);
+
+            if (!res.ok) {
+                throw new Error(data.error || data.details || 'Upload failed');
+            }
+
+            if (!data.url) {
+                throw new Error('No URL returned from upload');
+            }
+
+            console.log('Upload successful, URL:', data.url);
             setImageUrl(data.url);
+            alert('Image uploaded successfully!');
         } catch (error) {
             console.error('Error uploading image:', error);
-            alert('Failed to upload image. Please try again.');
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            alert(`Failed to upload image: ${errorMessage}\n\nPlease try again or check the console for details.`);
         } finally {
             setIsUploading(false);
         }
@@ -48,13 +65,24 @@ export default function ProductForm({ product }: ProductFormProps) {
 
     async function handleSubmit(formData: FormData) {
         startTransition(async () => {
-            if (isEditing) {
-                await updateProduct(product.id, formData);
-            } else {
-                await createProduct(formData);
+            try {
+                console.log('Submitting product form...');
+                console.log('Image URL:', imageUrl);
+                console.log('Has Power:', formData.get('hasPower'));
+                console.log('Is Accessory:', formData.get('isAccessory'));
+
+                if (isEditing) {
+                    await updateProduct(product.id, formData);
+                } else {
+                    await createProduct(formData);
+                }
+                console.log('Product saved successfully');
+                router.push('/admin/products');
+                router.refresh();
+            } catch (error) {
+                console.error('Error saving product:', error);
+                alert(`Failed to save product: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
-            router.push('/admin/products');
-            router.refresh();
         });
     }
 

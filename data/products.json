@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": "e5b4d32d-41b1-4fe6-8000-b655497dbf60",
+    "name": "Test Product",
+    "price": 9900,
+    "category": "Sunglasses",
+    "image": "/uploads/f3b62180-2e70-48d9-8e56-5a7503fac832.svg",
+    "stock": 6,
+    "description": "vvhbkjnl;",
+    "hasPower": true,
+    "isAccessory": false
+  },
+  {
+    "id": "2eb020a1-aa66-4e80-a671-5b319ab34093",
+    "name": "Test Premium Glasses",
+    "price": 2999,
+    "category": "Eyeglasses",
+    "image": "https://placehold.co/600x400",
+    "stock": 10,
+    "description": "Premium test glasses with advanced features",
+    "hasPower": true,
+    "isAccessory": true
+  }
+]
