@@ -64,7 +64,15 @@ export default async function ProductList() {
                                     <td className="px-8 py-8">
                                         <p className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">{product.category}</p>
                                         <h3 className="font-bold text-foreground text-lg leading-tight">{product.name}</h3>
-                                        <p className="text-xs text-muted-foreground mt-1 truncate max-w-[200px]">ID: {product.id.slice(0, 8)}...</p>
+                                        <div className="flex items-center space-x-2 mt-1">
+                                            <p className="text-xs text-muted-foreground truncate max-w-[100px]">ID: {product.id.slice(0, 8)}...</p>
+                                            {product.hasPower && (
+                                                <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[8px] font-black uppercase rounded dark:bg-primary/20">Power</span>
+                                            )}
+                                            {product.isAccessory && (
+                                                <span className="px-1.5 py-0.5 bg-accent/10 text-accent text-[8px] font-black uppercase rounded dark:bg-accent/20">Accessory</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-8 py-8">
                                         <span className="text-xl font-black text-foreground tracking-tighter">

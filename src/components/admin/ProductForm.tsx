@@ -131,6 +131,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                                         <option value="Sunglasses">Sunglasses</option>
                                         <option value="Contact Lenses">Contact Lenses</option>
                                         <option value="Computer Glasses">Computer Glasses</option>
+                                        <option value="Accessories">Accessories</option>
                                     </select>
                                 </div>
 
@@ -177,23 +178,53 @@ export default function ProductForm({ product }: ProductFormProps) {
                             <Box className="w-5 h-5 text-primary" />
                             <h2 className="text-xl font-black tracking-tighter uppercase">Inventory Logistics</h2>
                         </div>
-                        <div className="space-y-3">
-                            <label htmlFor="stock" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1">
-                                Stock Allocation
-                            </label>
-                            <input
-                                type="number"
-                                id="stock"
-                                name="stock"
-                                required
-                                min="0"
-                                defaultValue={product?.stock}
-                                className="w-full bg-muted/30 px-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-black"
-                                placeholder="0 items available"
-                            />
-                            <p className="text-[10px] text-muted-foreground font-medium pl-1 italic">
-                                Set to zero for "Exhausted" status.
-                            </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-3">
+                                <label htmlFor="stock" className="text-xs font-black text-muted-foreground uppercase tracking-widest pl-1">
+                                    Stock Allocation
+                                </label>
+                                <input
+                                    type="number"
+                                    id="stock"
+                                    name="stock"
+                                    required
+                                    min="0"
+                                    defaultValue={product?.stock}
+                                    className="w-full bg-muted/30 px-6 py-5 rounded-[1.5rem] border border-border focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-black"
+                                    placeholder="0 items available"
+                                />
+                                <p className="text-[10px] text-muted-foreground font-medium pl-1 italic">
+                                    Set to zero for "Exhausted" status.
+                                </p>
+                            </div>
+
+                            <div className="space-y-6 flex flex-col justify-center">
+                                <div className="flex items-center space-x-4 p-4 bg-muted/30 rounded-2xl border border-border/50">
+                                    <input
+                                        type="checkbox"
+                                        id="hasPower"
+                                        name="hasPower"
+                                        defaultChecked={product?.hasPower}
+                                        className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
+                                    />
+                                    <label htmlFor="hasPower" className="text-sm font-bold cursor-pointer">
+                                        Supports Custom Power
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center space-x-4 p-4 bg-muted/30 rounded-2xl border border-border/50">
+                                    <input
+                                        type="checkbox"
+                                        id="isAccessory"
+                                        name="isAccessory"
+                                        defaultChecked={product?.isAccessory}
+                                        className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
+                                    />
+                                    <label htmlFor="isAccessory" className="text-sm font-bold cursor-pointer">
+                                        Mark as Accessory
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

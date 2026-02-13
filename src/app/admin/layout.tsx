@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { LayoutDashboard, Package, Settings, LogOut, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, ArrowLeft, Box } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { adminLogout } from './actions';
 
 export default function AdminLayout({
     children,
@@ -27,6 +28,7 @@ export default function AdminLayout({
                     {[
                         { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
                         { name: 'Inventory', icon: Package, href: '/admin/products' },
+                        { name: 'Accessories', icon: Box, href: '/admin/products?category=Accessories' },
                         { name: 'Settings', icon: Settings, href: '/admin/settings' },
                     ].map((item) => (
                         <Link
@@ -40,10 +42,19 @@ export default function AdminLayout({
                     ))}
                 </nav>
 
-                <div className="p-8 border-t border-border mt-auto">
+                <div className="p-8 border-t border-border mt-auto space-y-4">
+                    <form action={adminLogout}>
+                        <button
+                            type="submit"
+                            className="w-full flex items-center space-x-4 px-6 py-4 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-500 rounded-2xl transition-all font-bold text-sm"
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span>Logout</span>
+                        </button>
+                    </form>
                     <Link
                         href="/"
-                        className="flex items-center space-x-4 px-6 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all font-bold text-sm"
+                        className="flex items-center space-x-4 px-6 py-4 text-primary hover:bg-primary/5 rounded-2xl transition-all font-bold text-sm"
                     >
                         <ArrowLeft className="w-5 h-5" />
                         <span>Return to Store</span>

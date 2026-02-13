@@ -51,6 +51,7 @@ export default function Navbar() {
         { name: 'Sunglasses', href: '/products?category=Sunglasses' },
         { name: 'Computer Glasses', href: '/products?category=Computer Glasses' },
         { name: 'Contact Lenses', href: '/products?category=Contact Lenses' },
+        { name: 'Accessories', href: '/products?category=Accessories' },
     ];
 
     if (!mounted) return <div className="h-20 w-full" />;

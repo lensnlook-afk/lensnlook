@@ -10,6 +10,8 @@ export interface Product {
     image: string;
     stock: number;
     description: string;
+    hasPower?: boolean;
+    isAccessory?: boolean;
 }
 
 const dataFilePath = path.join(process.cwd(), 'data', 'products.json');
@@ -100,6 +102,8 @@ export async function saveProduct(product: Product): Promise<void> {
             image: product.image,
             stock: product.stock,
             description: product.description,
+            hasPower: product.hasPower,
+            isAccessory: product.isAccessory,
         });
 
     if (error) {
