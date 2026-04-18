@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, CreditCard, Truck, ShieldCheck, Lock, Sparkles, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { placeOrder } from '@/app/actions';
 
 export default function CheckoutPage() {
     const { items, total, clearCart } = useCart();
@@ -39,10 +40,39 @@ export default function CheckoutPage() {
         }
 
         setIsProcessing(true);
-        // Simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        clearCart();
-        router.push('/checkout/success');
+        
+        try {
+            const orderItems = items.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image
+            }));
+
+            const result = await placeOrder({
+                customerName: formData.name,
+                customerEmail: formData.email,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zip: formData.zip,
+                items: orderItems,
+                total: grandTotal
+            });
+
+            if (result.success) {
+                clearCart();
+                router.push('/checkout/success');
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Failed to place order. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (items.length === 0) {

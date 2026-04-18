@@ -1,15 +1,17 @@
-import { getProducts } from '@/lib/db';
-import { Package, DollarSign, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity, CloudOff, Info } from 'lucide-react';
+import { getProducts, getOrders } from '@/lib/db';
+import { Package, DollarSign, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity, CloudOff, Info, ShoppingBag, Clock, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 export default async function AdminDashboard() {
     const products = await getProducts();
+    const orders = await getOrders();
     const isSupabaseConfigured = !!supabase;
     const totalStock = products.reduce((acc, p) => acc + (p.stock || 0), 0);
     const totalValue = products.reduce((acc, p) => acc + ((p.price || 0) * (p.stock || 0)), 0);
     const lowStockProducts = products.filter(p => (p.stock || 0) < 10);
     const outOfStock = products.filter(p => (p.stock || 0) === 0);
+    const totalRevenue = orders.reduce((acc, o) => acc + (o.total || 0), 0);
 
     return (
         <div className="space-y-12 pb-20">
@@ -38,11 +40,11 @@ export default async function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
                     {
-                        label: 'Gross Valuation',
-                        value: `₹${totalValue.toLocaleString()}`,
+                        label: 'Total Revenue',
+                        value: `₹${totalRevenue.toLocaleString()}`,
                         icon: DollarSign,
-                        color: 'bg-primary',
-                        trend: '+12.5%',
+                        color: 'bg-emerald-600',
+                        trend: '+15.2%',
                         trendUp: true
                     },
                     {
@@ -164,6 +166,58 @@ export default async function AdminDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Recent Acquisitions */}
+            <div className="bg-card rounded-[3rem] border border-border overflow-hidden shadow-2xl shadow-black/[0.03]">
+                <div className="p-8 border-b border-border flex items-center justify-between bg-muted/20">
+                    <div className="flex items-center space-x-3">
+                        <ShoppingBag className="w-6 h-6 text-primary" />
+                        <h2 className="text-2xl font-black tracking-tighter">Recent Acquisitions.</h2>
+                    </div>
+                    <Link href="/admin/orders" className="text-xs font-bold text-primary uppercase tracking-widest hover:underline">View All Orders</Link>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-muted/10">
+                            <tr>
+                                <th className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Customer</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Value</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/50">
+                            {orders.slice(0, 5).map((order) => (
+                                <tr key={order.id} className="hover:bg-primary/[0.01] transition-colors">
+                                    <td className="px-8 py-6">
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-sm text-foreground">{order.customerName}</span>
+                                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{order.items.length} Pieces</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-6 font-black text-foreground">₹{order.total.toLocaleString()}</td>
+                                    <td className="px-8 py-6">
+                                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20`}>
+                                            {order.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-8 py-6 text-xs font-bold text-muted-foreground italic">
+                                        {new Date(order.createdAt).toLocaleDateString()}
+                                    </td>
+                                </tr>
+                            ))}
+                            {orders.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="px-8 py-20 text-center">
+                                        <p className="text-muted-foreground font-medium uppercase text-xs tracking-widest opacity-50">No orders cataloged yet.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     );
 }

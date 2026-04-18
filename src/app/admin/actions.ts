@@ -1,6 +1,6 @@
 'use server';
 
-import { saveProduct, deleteProduct, Product } from '@/lib/db';
+import { saveProduct, deleteProduct, Product, updateOrderStatus, Order } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
@@ -135,5 +135,17 @@ export async function deleteProductAction(id: string) {
     } catch (error) {
         console.error('Failed to delete product:', error);
         return { success: false, error: 'Failed to delete product' };
+    }
+}
+
+export async function updateOrderStatusAction(id: string, status: Order['status']) {
+    try {
+        await updateOrderStatus(id, status);
+        revalidatePath('/admin/orders');
+        revalidatePath('/admin');
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to update order status:', error);
+        return { success: false, error: 'Failed to update order status' };
     }
 }

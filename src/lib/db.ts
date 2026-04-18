@@ -14,7 +14,30 @@ export interface Product {
     isAccessory?: boolean;
 }
 
+export interface OrderItem {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+}
+
+export interface Order {
+    id: string;
+    customerName: string;
+    customerEmail: string;
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    items: OrderItem[];
+    total: number;
+    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    createdAt: string;
+}
+
 const dataFilePath = path.join(process.cwd(), 'data', 'products.json');
+const ordersFilePath = path.join(process.cwd(), 'data', 'orders.json');
 
 // Helper to use local file system if Supabase is not connected
 async function getLocalProducts(): Promise<Product[]> {
@@ -134,4 +157,105 @@ export async function deleteProduct(id: string): Promise<void> {
         console.error('Error deleting product:', error);
         throw new Error('Failed to delete product');
     }
+}
+
+// --- Order Helpers ---
+
+async function getLocalOrders(): Promise<Order[]> {
+    try {
+        const data = await fs.readFile(ordersFilePath, 'utf-8');
+        return JSON.parse(data);
+    } catch (error) {
+        return [];
+    }
+}
+
+async function saveLocalOrder(order: Order): Promise<void> {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('Local file storage is not supported in production. Please configure Supabase.');
+    }
+    const orders = await getLocalOrders();
+    const index = orders.findIndex((o) => o.id === order.id);
+
+    if (index >= 0) {
+        orders[index] = order;
+    } else {
+        orders.push(order);
+    }
+
+    await fs.writeFile(ordersFilePath, JSON.stringify(orders, null, 2));
+}
+
+export async function getOrders(): Promise<Order[]> {
+    if (!supabase) {
+        const orders = await getLocalOrders();
+        return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching orders:', error);
+        return getLocalOrders();
+    }
+
+    return data as Order[];
+}
+
+export async function getOrder(id: string): Promise<Order | undefined> {
+    if (!supabase) {
+        const orders = await getLocalOrders();
+        return orders.find(o => o.id === id);
+    }
+
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) {
+        console.error('Error fetching order:', error);
+        return undefined;
+    }
+
+    return data as Order;
+}
+
+export async function saveOrder(order: Order): Promise<void> {
+    if (!supabase) {
+        return saveLocalOrder(order);
+    }
+
+    const { error } = await supabase
+        .from('orders')
+        .upsert({
+            id: order.id,
+            customer_name: order.customerName,
+            customer_email: order.customerEmail,
+            address: order.address,
+            city: order.city,
+            state: order.state,
+            zip: order.zip,
+            items: order.items,
+            total: order.total,
+            status: order.status,
+            created_at: order.createdAt,
+        });
+
+    if (error) {
+        console.error('Error saving order:', error);
+        throw new Error('Failed to save order');
+    }
+}
+
+export async function updateOrderStatus(id: string, status: Order['status']): Promise<void> {
+    const order = await getOrder(id);
+    if (!order) throw new Error('Order not found');
+    
+    order.status = status;
+    await saveOrder(order);
 }
