@@ -1,9 +1,11 @@
 import { getProducts } from '@/lib/db';
-import { Package, DollarSign, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+import { Package, DollarSign, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity, CloudOff, Info } from 'lucide-react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default async function AdminDashboard() {
     const products = await getProducts();
+    const isSupabaseConfigured = !!supabase;
     const totalStock = products.reduce((acc, p) => acc + (p.stock || 0), 0);
     const totalValue = products.reduce((acc, p) => acc + ((p.price || 0) * (p.stock || 0)), 0);
     const lowStockProducts = products.filter(p => (p.stock || 0) < 10);
@@ -13,8 +15,23 @@ export default async function AdminDashboard() {
         <div className="space-y-12 pb-20">
             {/* Header Section */}
             <div>
-                <h1 className="text-6xl font-heading font-black tracking-tighter text-foreground mb-4">Command Center.</h1>
-                <p className="text-muted-foreground text-lg font-medium opacity-80">Holistic overview of your luxury eyewear empire.</p>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
+                    <div>
+                        <h1 className="text-6xl font-heading font-black tracking-tighter text-foreground mb-2">Command Center.</h1>
+                        <p className="text-muted-foreground text-lg font-medium opacity-80">Holistic overview of your luxury eyewear empire.</p>
+                    </div>
+                    {!isSupabaseConfigured && (
+                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center space-x-4 animate-pulse">
+                            <div className="bg-amber-500 p-2 rounded-xl">
+                                <CloudOff className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-amber-500 text-[10px] font-black uppercase tracking-widest">Local Demo Mode</p>
+                                <p className="text-amber-700/80 text-xs font-bold leading-tight">Data will not persist in production. Connect Supabase to sync.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Core Metrics Grid */}

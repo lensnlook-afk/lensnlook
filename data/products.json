@@ -20,5 +20,16 @@
     "description": "Premium test glasses with advanced features",
     "hasPower": true,
     "isAccessory": true
+  },
+  {
+    "id": "fb75d819-7bc0-4a63-83eb-1899883a786f",
+    "name": "Blue Blockers Pro",
+    "price": 49.99,
+    "category": "Computer Glasses",
+    "image": "https://placehold.co/600x400",
+    "stock": 100,
+    "description": "Test glasses",
+    "hasPower": true,
+    "isAccessory": false
   }
 ]

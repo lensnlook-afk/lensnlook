@@ -27,6 +27,10 @@ async function getLocalProducts(): Promise<Product[]> {
 }
 
 async function saveLocalProduct(product: Product): Promise<void> {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('Local file storage is not supported in production. Please configure Supabase.');
+    }
+    
     const products = await getLocalProducts();
     const index = products.findIndex((p) => p.id === product.id);
 
@@ -40,6 +44,10 @@ async function saveLocalProduct(product: Product): Promise<void> {
 }
 
 async function deleteLocalProduct(id: string): Promise<void> {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('Local file storage is not supported in production. Please configure Supabase.');
+    }
+
     const products = await getLocalProducts();
     const filtered = products.filter((p) => p.id !== id);
     await fs.writeFile(dataFilePath, JSON.stringify(filtered, null, 2));

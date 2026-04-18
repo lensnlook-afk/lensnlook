@@ -28,7 +28,15 @@ export async function POST(request: Request) {
 
         // FALLBACK: If Supabase admin is not available, save locally
         if (!supabase) {
-            console.log('Supabase not configured, using local storage');
+            console.log('Supabase not configured, checking environment for local storage');
+            
+            if (process.env.NODE_ENV === 'production') {
+                return NextResponse.json({ 
+                    error: 'Cloud storage not configured.', 
+                    details: 'Supabase storage is required for production uploads.' 
+                }, { status: 501 });
+            }
+
             const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
             try {
