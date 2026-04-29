@@ -76,9 +76,9 @@ export default function CheckoutPage() {
             } else {
                 throw new Error(result.error);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Checkout error:', error);
-            alert('Failed to place order. Please try again.');
+            alert(error.message || 'Failed to place order. Please try again.');
         } finally {
             setIsProcessing(false);
         }
