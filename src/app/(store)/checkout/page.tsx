@@ -23,7 +23,7 @@ export default function CheckoutPage() {
         state: '',
         zip: '',
         notes: '',
-        paymentMethod: 'whatsapp'
+        paymentMethod: 'Cash on Delivery'
     });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -56,7 +56,7 @@ export default function CheckoutPage() {
                 zip: formData.zip,
                 items: orderItems,
                 total: grandTotal,
-                paymentMethod: 'WhatsApp Order (COD/UPI on Delivery)',
+                paymentMethod: formData.paymentMethod === 'whatsapp' ? 'Cash on Delivery' : formData.paymentMethod,
                 paymentStatus: 'pending'
             });
 
@@ -67,7 +67,7 @@ export default function CheckoutPage() {
                     address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
                     items: orderItems,
                     total: grandTotal,
-                    paymentMethod: 'Cash on Delivery / UPI on Delivery',
+                    paymentMethod: formData.paymentMethod === 'whatsapp' ? 'Cash on Delivery' : formData.paymentMethod,
                     notes: formData.notes
                 });
                 
@@ -231,15 +231,50 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="mt-12 p-8 bg-green-500/5 rounded-3xl border border-green-500/20">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3 bg-green-500/10 rounded-xl">
-                                            <MessageSquare className="w-6 h-6 text-green-600" />
+                                    <div className="flex flex-col gap-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-green-500/10 rounded-lg">
+                                                <MessageSquare className="w-5 h-5 text-green-600" />
+                                            </div>
+                                            <h3 className="text-sm font-black uppercase tracking-tight text-green-900">Select Payment Method (On Delivery)</h3>
                                         </div>
-                                        <div className="space-y-2">
-                                            <h3 className="text-sm font-black uppercase tracking-tight text-green-900">Payment on Delivery</h3>
-                                            <p className="text-[11px] font-bold text-green-700/80 leading-relaxed uppercase tracking-widest">
-                                                Confirm your order on WhatsApp. Pay via *Cash or UPI* when your package arrives at your doorstep.
-                                            </p>
+                                        
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <label className={`relative flex cursor-pointer rounded-2xl border p-4 hover:bg-green-500/5 transition-all ${formData.paymentMethod === 'Cash on Delivery' ? 'border-green-600 bg-green-500/5 ring-1 ring-green-600' : 'border-border bg-card'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="paymentMethod"
+                                                    value="Cash on Delivery"
+                                                    className="sr-only"
+                                                    checked={formData.paymentMethod === 'Cash on Delivery'}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <span className="flex flex-1">
+                                                    <span className="flex flex-col">
+                                                        <span className="block text-sm font-black text-foreground uppercase tracking-tight">Cash on Delivery</span>
+                                                        <span className="mt-1 flex items-center text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Pay with cash at your doorstep</span>
+                                                    </span>
+                                                </span>
+                                                <CheckCircle2 className={`h-5 w-5 ${formData.paymentMethod === 'Cash on Delivery' ? 'text-green-600' : 'text-transparent'}`} />
+                                            </label>
+
+                                            <label className={`relative flex cursor-pointer rounded-2xl border p-4 hover:bg-green-500/5 transition-all ${formData.paymentMethod === 'UPI on Delivery' ? 'border-green-600 bg-green-500/5 ring-1 ring-green-600' : 'border-border bg-card'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="paymentMethod"
+                                                    value="UPI on Delivery"
+                                                    className="sr-only"
+                                                    checked={formData.paymentMethod === 'UPI on Delivery'}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <span className="flex flex-1">
+                                                    <span className="flex flex-col">
+                                                        <span className="block text-sm font-black text-foreground uppercase tracking-tight">UPI on Delivery</span>
+                                                        <span className="mt-1 flex items-center text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Scan & Pay via GPay, PhonePe, Paytm</span>
+                                                    </span>
+                                                </span>
+                                                <CheckCircle2 className={`h-5 w-5 ${formData.paymentMethod === 'UPI on Delivery' ? 'text-green-600' : 'text-transparent'}`} />
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
