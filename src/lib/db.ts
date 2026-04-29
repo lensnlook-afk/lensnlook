@@ -2,16 +2,29 @@ import { supabase } from './supabase';
 import fs from 'fs/promises';
 import path from 'path';
 
+export interface ProductVariant {
+    name: string;   // e.g. "Size", "Color"
+    options: string[]; // e.g. ["S", "M", "L"] or ["Black", "Gold"]
+}
+
 export interface Product {
     id: string;
     name: string;
     price: number;
+    discountPrice?: number;
     category: string;
     image: string;
+    images?: string[];
     stock: number;
+    sku?: string;
     description: string;
     hasPower?: boolean;
     isAccessory?: boolean;
+    isActive?: boolean;
+    variants?: ProductVariant[];
+    tags?: string[];
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface OrderItem {
@@ -135,18 +148,68 @@ export async function saveProduct(product: Product): Promise<void> {
             id: product.id,
             name: product.name,
             price: product.price,
+            discount_price: product.discountPrice ?? null,
             category: product.category,
             image: product.image,
+            images: product.images ?? [],
             stock: product.stock,
+            sku: product.sku ?? null,
             description: product.description,
             hasPower: product.hasPower,
             isAccessory: product.isAccessory,
+            is_active: product.isActive ?? true,
+            variants: product.variants ?? [],
+            tags: product.tags ?? [],
+            updated_at: new Date().toISOString(),
         });
 
     if (error) {
         console.error('Error saving product:', error);
         throw new Error('Failed to save product');
     }
+}
+
+export async function quickUpdateStock(id: string, stock: number): Promise<void> {
+    if (!supabase) {
+        const products = await getLocalProducts();
+        const product = products.find(p => p.id === id);
+        if (product) {
+            product.stock = stock;
+            product.updatedAt = new Date().toISOString();
+            await saveLocalProduct(product);
+        }
+        return;
+    }
+    const { error } = await supabase
+        .from('products')
+        .update({ stock, updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw new Error('Failed to update stock');
+}
+
+export async function toggleProductVisibility(id: string, isActive: boolean): Promise<void> {
+    if (!supabase) {
+        const products = await getLocalProducts();
+        const product = products.find(p => p.id === id);
+        if (product) {
+            product.isActive = isActive;
+            product.updatedAt = new Date().toISOString();
+            await saveLocalProduct(product);
+        }
+        return;
+    }
+    const { error } = await supabase
+        .from('products')
+        .update({ is_active: isActive, updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw new Error('Failed to toggle visibility');
+}
+
+export async function decrementStock(productId: string, quantity: number): Promise<void> {
+    const product = await getProduct(productId);
+    if (!product) return;
+    const newStock = Math.max(0, product.stock - quantity);
+    await quickUpdateStock(productId, newStock);
 }
 
 export async function deleteProduct(id: string): Promise<void> {
