@@ -1,6 +1,7 @@
 'use client';
 
-import { Order, updateOrderStatusAction } from '@/app/admin/actions';
+import { updateOrderStatusAction } from '@/app/admin/actions';
+import { Order } from '@/lib/db';
 import { X, Package, Truck, CheckCircle2, Clock, XCircle, User, Mail, Phone, MapPin, CreditCard, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';

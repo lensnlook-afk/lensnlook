@@ -52,7 +52,9 @@ export default function RealtimeProducts({ initialProducts }: RealtimeProductsPr
             .subscribe();
 
         return () => {
-            supabase.removeChannel(channel);
+            if (supabase) {
+                supabase.removeChannel(channel);
+            }
         };
     }, []);
 
