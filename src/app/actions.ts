@@ -30,7 +30,7 @@ export async function placeOrder(orderData: {
         // Send email notifications asynchronously
         sendOrderConfirmationEmail(newOrder).catch(err => console.error('Email failed:', err));
 
-        return { success: true, orderId: newOrder.id };
+        return { success: true, orderId: newOrder.id, error: undefined };
     } catch (error: any) {
         console.error('Failed to save order to DB:', error);
         
@@ -39,8 +39,9 @@ export async function placeOrder(orderData: {
         // We include a 'dbError' flag just in case we want to handle it.
         return { 
             success: true, 
-            orderId: newOrder.id,
-            warning: 'Order saved to WhatsApp only (DB sync skipped)' 
+            orderId: uuidv4(), // Fallback ID if save failed
+            warning: 'Order saved to WhatsApp only (DB sync skipped)',
+            error: error.message || 'Database sync failed'
         };
     }
 }

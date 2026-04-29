@@ -4,24 +4,37 @@ import { Order } from '@/lib/db';
 
 // Lazy initialization to prevent build-time crashes if API key is missing
 let resend: Resend | null = null;
+
 const getResend = () => {
-    if (!resend && process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_your_api_key') {
-        resend = new Resend(process.env.RESEND_API_KEY);
+    if (resend) return resend;
+    
+    const apiKey = process.env.RESEND_API_KEY;
+    
+    // Extremely defensive check to avoid instantiating during build or with placeholders
+    if (apiKey && 
+        apiKey !== 're_your_api_key' && 
+        apiKey.startsWith('re_') && 
+        apiKey.length > 10) {
+        try {
+            resend = new Resend(apiKey);
+            return resend;
+        } catch (error) {
+            console.error('Failed to initialize Resend:', error);
+            return null;
+        }
     }
-    return resend;
+    return null;
 };
 
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@lensnlook.com';
 
 export async function sendOrderConfirmationEmail(order: Order) {
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_api_key') {
-        console.log('Skipping email: Resend API Key not configured.');
-        return;
-    }
-
     try {
         const resendClient = getResend();
-        if (!resendClient) return;
+        if (!resendClient) {
+            console.log('Skipping email: Resend API Key not configured or invalid.');
+            return;
+        }
 
         // Email to Customer
         await resendClient.emails.send({
@@ -77,8 +90,6 @@ export async function sendOrderConfirmationEmail(order: Order) {
 }
 
 export async function sendStatusUpdateEmail(order: Order) {
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_api_key') return;
-
     try {
         const resendClient = getResend();
         if (!resendClient) return;
