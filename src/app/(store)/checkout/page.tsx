@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { cn, generateWhatsAppUrl } from '@/lib/utils';
 import { placeOrder } from '@/app/actions';
 
-export const revalidate = 0;
+
 
 export default function CheckoutPage() {
     const { items, total, clearCart } = useCart();

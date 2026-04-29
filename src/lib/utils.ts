@@ -17,7 +17,15 @@ export function generateWhatsAppUrl(orderData: {
   customerName: string;
   customerPhone: string;
   address: string;
-  items: any[];
+  items: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+    prescription?: string;
+    coating?: string;
+  }[];
   total: number;
   paymentMethod: string;
   notes?: string;

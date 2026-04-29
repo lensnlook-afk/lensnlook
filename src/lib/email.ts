@@ -1,9 +1,11 @@
 import { Resend } from 'resend';
 
+import { Order } from '@/lib/db';
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@lensnlook.com';
 
-export async function sendOrderConfirmationEmail(order: any) {
+export async function sendOrderConfirmationEmail(order: Order) {
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_api_key') {
         console.log('Skipping email: Resend API Key not configured.');
         return;
@@ -26,7 +28,7 @@ export async function sendOrderConfirmationEmail(order: any) {
                     <p><strong>Shipping Address:</strong> ${order.address}, ${order.city}, ${order.state} ${order.zip}</p>
                     <hr />
                     <h3>Items</h3>
-                    ${order.items.map((item: any) => `
+                    ${order.items.map((item) => `
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                             <span>${item.name} (x${item.quantity})</span>
                             <span>₹${(item.price * item.quantity).toLocaleString()}</span>
@@ -63,7 +65,7 @@ export async function sendOrderConfirmationEmail(order: any) {
     }
 }
 
-export async function sendStatusUpdateEmail(order: any) {
+export async function sendStatusUpdateEmail(order: Order) {
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_api_key') return;
 
     try {
