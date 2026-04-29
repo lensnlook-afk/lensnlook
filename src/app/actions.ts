@@ -31,8 +31,8 @@ export async function placeOrder(orderData: {
         sendOrderConfirmationEmail(newOrder).catch(err => console.error('Email failed:', err));
 
         return { success: true, orderId: newOrder.id };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to place order:', error);
-        return { success: false, error: 'Failed to place order' };
+        return { success: false, error: `Failed to place order: ${error.message || 'Unknown error'}` };
     }
 }
