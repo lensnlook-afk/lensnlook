@@ -20,18 +20,24 @@ export interface OrderItem {
     price: number;
     quantity: number;
     image: string;
+    prescription?: string;
+    coating?: string;
+    variant?: string;
 }
 
 export interface Order {
     id: string;
     customerName: string;
     customerEmail: string;
+    customerPhone: string;
     address: string;
     city: string;
     state: string;
     zip: string;
     items: OrderItem[];
     total: number;
+    paymentMethod: string;
+    paymentStatus: 'pending' | 'paid' | 'failed';
     status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     createdAt: string;
 }
@@ -236,12 +242,15 @@ export async function saveOrder(order: Order): Promise<void> {
             id: order.id,
             customer_name: order.customerName,
             customer_email: order.customerEmail,
+            customer_phone: order.customerPhone,
             address: order.address,
             city: order.city,
             state: order.state,
             zip: order.zip,
             items: order.items,
             total: order.total,
+            payment_method: order.paymentMethod,
+            payment_status: order.paymentStatus,
             status: order.status,
             created_at: order.createdAt,
         });

@@ -6,12 +6,12 @@ import { ShoppingBag, Check } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-export default function AddToCartButton({ product, className }: { product: Product, className?: string }) {
+export default function AddToCartButton({ product, className, prescription, coating }: { product: Product, className?: string, prescription?: string, coating?: string }) {
     const { addToCart } = useCart();
     const [isAdded, setIsAdded] = useState(false);
 
     const handleAddToCart = () => {
-        addToCart(product);
+        addToCart(product, prescription, coating);
         setIsAdded(true);
         setTimeout(() => setIsAdded(false), 2000);
     };

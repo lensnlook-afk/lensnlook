@@ -5,14 +5,16 @@ import { Product } from '@/lib/db';
 
 export interface CartItem extends Product {
     quantity: number;
+    prescription?: string;
+    coating?: string;
 }
 
 interface CartContextType {
     items: CartItem[];
-    addItem: (product: Product) => void;
-    addToCart: (product: Product) => void;
-    removeItem: (productId: string) => void;
-    updateQuantity: (productId: string, quantity: number) => void;
+    addItem: (product: Product, prescription?: string, coating?: string) => void;
+    addToCart: (product: Product, prescription?: string, coating?: string) => void;
+    removeItem: (productId: string, prescription?: string, coating?: string) => void;
+    updateQuantity: (productId: string, quantity: number, prescription?: string, coating?: string) => void;
     clearCart: () => void;
     total: number;
     totalItems: number;
@@ -36,29 +38,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('cart', JSON.stringify(items));
     }, [items]);
 
-    const addItem = (product: Product) => {
+    const addItem = (product: Product, prescription?: string, coating?: string) => {
         setItems((prev) => {
-            const existing = prev.find((item) => item.id === product.id);
+            const existing = prev.find((item) => 
+                item.id === product.id && 
+                item.prescription === prescription && 
+                item.coating === coating
+            );
             if (existing) {
                 return prev.map((item) =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+                    (item.id === product.id && item.prescription === prescription && item.coating === coating) 
+                        ? { ...item, quantity: item.quantity + 1 } 
+                        : item
                 );
             }
-            return [...prev, { ...product, quantity: 1 }];
+            return [...prev, { ...product, quantity: 1, prescription, coating }];
         });
     };
 
     const addToCart = addItem;
 
-    const removeItem = (productId: string) => {
-        setItems((prev) => prev.filter((item) => item.id !== productId));
+    const removeItem = (productId: string, prescription?: string, coating?: string) => {
+        setItems((prev) => prev.filter((item) => 
+            !(item.id === productId && item.prescription === prescription && item.coating === coating)
+        ));
     };
 
-    const updateQuantity = (productId: string, quantity: number) => {
+    const updateQuantity = (productId: string, quantity: number, prescription?: string, coating?: string) => {
         if (quantity < 1) return;
         setItems((prev) =>
             prev.map((item) =>
-                item.id === productId ? { ...item, quantity } : item
+                (item.id === productId && item.prescription === prescription && item.coating === coating) 
+                    ? { ...item, quantity } 
+                    : item
             )
         );
     };

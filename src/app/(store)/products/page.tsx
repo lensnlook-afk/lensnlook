@@ -1,5 +1,6 @@
 import { getProducts } from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
+import RealtimeProducts from '@/components/RealtimeProducts';
 import Link from 'next/link';
 import { Search, ShoppingBag, SlidersHorizontal, ArrowLeft } from 'lucide-react';
 
@@ -79,13 +80,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
                 {/* Main Content */}
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {products.map((product, idx) => (
-                            <div key={product.id} className="animate-in fade-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${idx * 50}ms` }}>
-                                <ProductCard product={product} />
-                            </div>
-                        ))}
-                    </div>
+                    <RealtimeProducts initialProducts={products} />
                 ) : (
                     <div className="flex flex-col items-center justify-center py-32 bg-card rounded-[3rem] border border-border/50 text-center px-6">
                         <div className="w-20 h-20 bg-secondary/5 rounded-full flex items-center justify-center mb-8">
