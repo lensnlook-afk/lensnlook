@@ -81,14 +81,30 @@ export default function ProductForm({ product }: ProductFormProps) {
         }
     };
 
-    const handleAdditionalImageUpload = async (file: File) => {
+    const handleAdditionalImageUpload = async (files: FileList | File[]) => {
         setUploadingIndex(-1);
+        let successCount = 0;
+        let failCount = 0;
+
         try {
-            const url = await uploadFile(file);
-            setAdditionalImages(prev => [...prev, url]);
-            showToast('success', 'Image added');
-        } catch (e) {
-            showToast('error', e instanceof Error ? e.message : 'Upload failed');
+            const uploadPromises = Array.from(files).map(async (file) => {
+                try {
+                    const url = await uploadFile(file);
+                    setAdditionalImages(prev => [...prev, url]);
+                    successCount++;
+                } catch (e) {
+                    failCount++;
+                }
+            });
+
+            await Promise.all(uploadPromises);
+
+            if (successCount > 0) {
+                showToast('success', `${successCount} image(s) added`);
+            }
+            if (failCount > 0) {
+                showToast('error', `Failed to upload ${failCount} image(s)`);
+            }
         } finally {
             setUploadingIndex(null);
         }
@@ -469,16 +485,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                                     if (file) handlePrimaryImageUpload(file);
                                 }}
                             />
-                            {/* Or paste URL */}
-                            <div className="mt-3">
-                                <input
-                                    type="url"
-                                    value={primaryImage}
-                                    onChange={e => setPrimaryImage(e.target.value)}
-                                    placeholder="Or paste image URL…"
-                                    className={cn(inputClass, 'text-xs')}
-                                />
-                            </div>
+
                         </Section>
 
                         {/* Additional Images */}
@@ -515,10 +522,12 @@ export default function ProductForm({ product }: ProductFormProps) {
                                 ref={additionalFileInputRef}
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 className="hidden"
                                 onChange={e => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleAdditionalImageUpload(file);
+                                    const files = e.target.files;
+                                    if (files && files.length > 0) handleAdditionalImageUpload(files);
+                                    if (additionalFileInputRef.current) additionalFileInputRef.current.value = '';
                                 }}
                             />
                         </Section>

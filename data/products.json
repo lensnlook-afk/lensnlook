@@ -1,35 +1,21 @@
 [
   {
-    "id": "e5b4d32d-41b1-4fe6-8000-b655497dbf60",
-    "name": "Test Product",
-    "price": 9900,
+    "id": "44b58282-1f97-47d2-aeb9-e45f4ff4db01",
+    "name": "mac",
+    "price": 1299,
+    "discountPrice": 1288.96,
     "category": "Sunglasses",
-    "image": "/uploads/f3b62180-2e70-48d9-8e56-5a7503fac832.svg",
-    "stock": 6,
-    "description": "vvhbkjnl;",
+    "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
+    "images": [],
+    "stock": 9,
+    "sku": "RB8501",
+    "description": "1234567",
     "hasPower": true,
-    "isAccessory": false
-  },
-  {
-    "id": "2eb020a1-aa66-4e80-a671-5b319ab34093",
-    "name": "Test Premium Glasses",
-    "price": 2999,
-    "category": "Eyeglasses",
-    "image": "https://placehold.co/600x400",
-    "stock": 10,
-    "description": "Premium test glasses with advanced features",
-    "hasPower": true,
-    "isAccessory": true
-  },
-  {
-    "id": "fb75d819-7bc0-4a63-83eb-1899883a786f",
-    "name": "Blue Blockers Pro",
-    "price": 49.99,
-    "category": "Computer Glasses",
-    "image": "https://placehold.co/600x400",
-    "stock": 100,
-    "description": "Test glasses",
-    "hasPower": true,
-    "isAccessory": false
+    "isAccessory": true,
+    "isActive": true,
+    "variants": [],
+    "tags": [],
+    "createdAt": "2026-04-29T14:47:05.208Z",
+    "updatedAt": "2026-04-29T14:47:08.709Z"
   }
 ]
