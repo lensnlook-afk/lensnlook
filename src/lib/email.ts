@@ -2,7 +2,15 @@ import { Resend } from 'resend';
 
 import { Order } from '@/lib/db';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to prevent build-time crashes if API key is missing
+let resend: Resend | null = null;
+const getResend = () => {
+    if (!resend && process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_your_api_key') {
+        resend = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resend;
+};
+
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@lensnlook.com';
 
 export async function sendOrderConfirmationEmail(order: Order) {
@@ -12,8 +20,11 @@ export async function sendOrderConfirmationEmail(order: Order) {
     }
 
     try {
+        const resendClient = getResend();
+        if (!resendClient) return;
+
         // Email to Customer
-        await resend.emails.send({
+        await resendClient.emails.send({
             from: 'Lens&Look <orders@lensnlook.com>',
             to: order.customerEmail,
             subject: `Order Confirmed: #${order.id.slice(0, 8).toUpperCase()}`,
@@ -41,7 +52,7 @@ export async function sendOrderConfirmationEmail(order: Order) {
         });
 
         // Notification to Admin
-        await resend.emails.send({
+        await resendClient.emails.send({
             from: 'Lens&Look System <system@lensnlook.com>',
             to: adminEmail,
             subject: `New Acquisition Alert: #${order.id.slice(0, 8).toUpperCase()}`,
@@ -69,7 +80,10 @@ export async function sendStatusUpdateEmail(order: Order) {
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_api_key') return;
 
     try {
-        await resend.emails.send({
+        const resendClient = getResend();
+        if (!resendClient) return;
+        
+        await resendClient.emails.send({
             from: 'Lens&Look <orders@lensnlook.com>',
             to: order.customerEmail,
             subject: `Order Update: #${order.id.slice(0, 8).toUpperCase()}`,
