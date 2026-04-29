@@ -7,7 +7,7 @@ import BuyNowButton from '@/components/BuyNowButton';
 import ProductSelection from '@/components/ProductSelection';
 import { Metadata } from 'next';
 
-export const revalidate = 0;
+
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;

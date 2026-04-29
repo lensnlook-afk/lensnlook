@@ -29,7 +29,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const saved = localStorage.getItem('cart');
         if (saved) {
-            setItems(JSON.parse(saved));
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setItems(parsed);
+                }
+            } catch (e) {
+                console.error('Failed to parse cart', e);
+            }
         }
     }, []);
 
