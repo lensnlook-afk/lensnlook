@@ -46,6 +46,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: an
         switch (status) {
             case 'pending': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
             case 'processing': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+            case 'ready': return 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
             case 'shipped': return 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20';
             case 'delivered': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
             case 'cancelled': return 'bg-red-500/10 text-red-600 border-red-500/20';
@@ -57,6 +58,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: an
         switch (status) {
             case 'pending': return <Clock className="w-3 h-3" />;
             case 'processing': return <Package className="w-3 h-3" />;
+            case 'ready': return <CheckCircle2 className="w-3 h-3" />;
             case 'shipped': return <Truck className="w-3 h-3" />;
             case 'delivered': return <CheckCircle2 className="w-3 h-3" />;
             case 'cancelled': return <XCircle className="w-3 h-3" />;
@@ -148,6 +150,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: an
                             <option value="all">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
+                            <option value="ready">Ready</option>
                             <option value="shipped">Shipped</option>
                             <option value="delivered">Delivered</option>
                             <option value="cancelled">Cancelled</option>

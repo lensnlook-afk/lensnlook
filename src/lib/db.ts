@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, getSupabaseAdmin } from './supabase';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -51,7 +51,7 @@ export interface Order {
     total: number;
     paymentMethod: string;
     paymentStatus: 'pending' | 'paid' | 'failed';
-    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    status: 'pending' | 'processing' | 'ready' | 'shipped' | 'delivered' | 'cancelled';
     createdAt: string;
 }
 
@@ -110,7 +110,13 @@ export async function getProducts(): Promise<Product[]> {
         return getLocalProducts();
     }
 
-    return data as Product[];
+    return data.map(p => ({
+        ...p,
+        discountPrice: p.discount_price,
+        isActive: p.is_active,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at
+    })) as Product[];
 }
 
 export async function getProduct(id: string): Promise<Product | undefined> {
@@ -130,7 +136,13 @@ export async function getProduct(id: string): Promise<Product | undefined> {
         return undefined;
     }
 
-    return data as Product;
+    return {
+        ...data,
+        discountPrice: data.discount_price,
+        isActive: data.is_active,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+    } as Product;
 }
 
 export async function getProductById(id: string): Promise<Product | undefined> {
@@ -142,7 +154,8 @@ export async function saveProduct(product: Product): Promise<void> {
         return saveLocalProduct(product);
     }
 
-    const { error } = await supabase
+    const client = getSupabaseAdmin() || supabase;
+    const { error } = await client
         .from('products')
         .upsert({
             id: product.id,
@@ -180,7 +193,8 @@ export async function quickUpdateStock(id: string, stock: number): Promise<void>
         }
         return;
     }
-    const { error } = await supabase
+    const client = getSupabaseAdmin() || supabase;
+    const { error } = await client
         .from('products')
         .update({ stock, updated_at: new Date().toISOString() })
         .eq('id', id);
@@ -198,7 +212,8 @@ export async function toggleProductVisibility(id: string, isActive: boolean): Pr
         }
         return;
     }
-    const { error } = await supabase
+    const client = getSupabaseAdmin() || supabase;
+    const { error } = await client
         .from('products')
         .update({ is_active: isActive, updated_at: new Date().toISOString() })
         .eq('id', id);
@@ -217,7 +232,8 @@ export async function deleteProduct(id: string): Promise<void> {
         return deleteLocalProduct(id);
     }
 
-    const { error } = await supabase
+    const client = getSupabaseAdmin() || supabase;
+    const { error } = await client
         .from('products')
         .delete()
         .eq('id', id);
@@ -271,7 +287,15 @@ export async function getOrders(): Promise<Order[]> {
         return getLocalOrders();
     }
 
-    return data as Order[];
+    return data.map(o => ({
+        ...o,
+        customerName: o.customer_name,
+        customerEmail: o.customer_email,
+        customerPhone: o.customer_phone,
+        paymentMethod: o.payment_method,
+        paymentStatus: o.payment_status,
+        createdAt: o.created_at
+    })) as Order[];
 }
 
 export async function getOrder(id: string): Promise<Order | undefined> {
@@ -291,7 +315,15 @@ export async function getOrder(id: string): Promise<Order | undefined> {
         return undefined;
     }
 
-    return data as Order;
+    return {
+        ...data,
+        customerName: data.customer_name,
+        customerEmail: data.customer_email,
+        customerPhone: data.customer_phone,
+        paymentMethod: data.payment_method,
+        paymentStatus: data.payment_status,
+        createdAt: data.created_at
+    } as Order;
 }
 
 export async function saveOrder(order: Order): Promise<void> {
@@ -299,7 +331,8 @@ export async function saveOrder(order: Order): Promise<void> {
         return saveLocalOrder(order);
     }
 
-    const { error } = await supabase
+    const client = getSupabaseAdmin() || supabase;
+    const { error } = await client
         .from('orders')
         .upsert({
             id: order.id,

@@ -30,6 +30,7 @@ export default function OrderDetailsModal({ order, onClose, onUpdate }: OrderDet
     const statusOptions = [
         { label: 'Pending', value: 'pending', icon: Clock, color: 'text-amber-500' },
         { label: 'Processing', value: 'processing', icon: Package, color: 'text-blue-500' },
+        { label: 'Ready', value: 'ready', icon: CheckCircle2, color: 'text-indigo-500' },
         { label: 'Shipped', value: 'shipped', icon: Truck, color: 'text-indigo-500' },
         { label: 'Delivered', value: 'delivered', icon: CheckCircle2, color: 'text-emerald-500' },
         { label: 'Cancelled', value: 'cancelled', icon: XCircle, color: 'text-red-500' },
