@@ -2,7 +2,8 @@
 
 import { Product } from '@/lib/db';
 import { useState } from 'react';
-import { Plus, Upload } from 'lucide-react';
+import { downloadCSV, convertToCSV } from '@/lib/csv';
+import { Plus, Upload, Download } from 'lucide-react';
 import Link from 'next/link';
 import ProductsClient from './ProductsClient';
 import BulkImport from '@/components/admin/BulkImport';
@@ -13,6 +14,21 @@ interface ProductsPageClientProps {
 
 export default function ProductsPageClient({ initialProducts }: ProductsPageClientProps) {
     const [showBulkImport, setShowBulkImport] = useState(false);
+
+    const handleExportCSV = () => {
+        const csv = convertToCSV(initialProducts.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            discountPrice: p.discountPrice || '',
+            category: p.category,
+            stock: p.stock,
+            sku: p.sku || '',
+            isActive: p.isActive ?? true,
+            createdAt: p.createdAt || ''
+        })));
+        downloadCSV(csv, `lensnlook-products-${new Date().toISOString().split('T')[0]}.csv`);
+    };
 
     return (
         <>
@@ -29,6 +45,13 @@ export default function ProductsPageClient({ initialProducts }: ProductsPageClie
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleExportCSV}
+                            className="flex items-center gap-2 px-5 py-3 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-bold text-sm transition-colors border border-border"
+                        >
+                            <Download className="w-4 h-4" />
+                            Export CSV
+                        </button>
                         <button
                             onClick={() => setShowBulkImport(true)}
                             className="flex items-center gap-2 px-5 py-3 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-bold text-sm transition-colors border border-border"

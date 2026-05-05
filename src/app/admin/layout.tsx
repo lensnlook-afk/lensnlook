@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LayoutDashboard, Package, Settings, LogOut, ArrowLeft, Box, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, ArrowLeft, Box, ShoppingBag, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { adminLogout } from './actions';
 
@@ -27,6 +27,7 @@ export default function AdminLayout({
                     <p className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Main Menu</p>
                     {[
                         { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
+                        { name: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
                         { name: 'Orders', icon: ShoppingBag, href: '/admin/orders' },
                         { name: 'Inventory', icon: Package, href: '/admin/products' },
                         { name: 'Accessories', icon: Box, href: '/admin/products?category=Accessories' },

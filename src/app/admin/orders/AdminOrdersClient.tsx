@@ -1,11 +1,12 @@
 'use client';
 
-import { ShoppingBag, Search, Filter, Eye, MoreVertical, Package, Clock, Truck, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
+import { ShoppingBag, Search, Filter, Eye, MoreVertical, Package, Clock, Truck, CheckCircle2, XCircle, RefreshCw, Download } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import OrderDetailsModal from '@/components/admin/OrderDetailsModal';
-import { getOrders } from '@/lib/db'; // Note: This will be moved to an action or client-side fetch if needed, but for now we'll pass orders as props
+import { getOrders } from '@/lib/db'; 
+import { downloadCSV, convertToCSV } from '@/lib/csv';
 
 export default function AdminOrdersClient({ initialOrders }: { initialOrders: any[] }) {
     const [orders, setOrders] = useState(initialOrders);
@@ -13,6 +14,20 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: an
     const [statusFilter, setStatusFilter] = useState('all');
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const handleExportCSV = () => {
+        const csv = convertToCSV(orders.map(o => ({
+            id: o.id,
+            customerName: o.customerName,
+            customerEmail: o.customerEmail,
+            customerPhone: o.customerPhone,
+            total: o.total,
+            status: o.status,
+            createdAt: o.createdAt,
+            itemsCount: o.items.length
+        })));
+        downloadCSV(csv, `lensnlook-orders-${new Date().toISOString().split('T')[0]}.csv`);
+    };
 
     const filteredOrders = useMemo(() => {
         return orders.filter(order => {
@@ -72,14 +87,23 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: an
                     <h1 className="text-6xl font-black tracking-tighter text-foreground">Manage Orders<span className="text-primary">.</span></h1>
                     <p className="text-muted-foreground text-lg font-medium opacity-80 mt-2">Track and update customer acquisitions.</p>
                 </div>
-                <button 
-                    onClick={handleRefresh}
-                    disabled={isLoading}
-                    className="flex items-center space-x-3 px-8 py-4 bg-muted/50 hover:bg-muted rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-border"
-                >
-                    <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                    <span>Sync Database</span>
-                </button>
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={handleExportCSV}
+                        className="flex items-center space-x-3 px-8 py-4 bg-muted/50 hover:bg-muted rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-border"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span>Export CSV</span>
+                    </button>
+                    <button 
+                        onClick={handleRefresh}
+                        disabled={isLoading}
+                        className="flex items-center space-x-3 px-8 py-4 bg-muted/50 hover:bg-muted rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-border"
+                    >
+                        <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                        <span>Sync Database</span>
+                    </button>
+                </div>
             </div>
 
             {/* Quick Stats */}
