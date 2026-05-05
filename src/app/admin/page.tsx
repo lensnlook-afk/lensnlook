@@ -1,12 +1,32 @@
 import { getProducts, getOrders } from '@/lib/db';
-import { Package, DollarSign, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity, CloudOff, Info, ShoppingBag, Clock, CheckCircle2 } from 'lucide-react';
+import { Package, DollarSign, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Activity, CloudOff, Info, ShoppingBag, Clock, CheckCircle2, Database } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 export default async function AdminDashboard() {
     const products = await getProducts();
     const orders = await getOrders();
-    const isSupabaseConfigured = !!supabase;
+    
+    // Check which database is being used
+    let dbStatus = 'Local (Ephemeral)';
+    let dbColor = 'text-amber-500';
+    let dbIcon = <CloudOff className="w-5 h-5 text-white" />;
+    
+    if (process.env.MONGODB_URI) {
+        dbStatus = 'MongoDB (Scalable)';
+        dbColor = 'text-emerald-500';
+        dbIcon = <Database className="w-5 h-5 text-white" />;
+    } else if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        dbStatus = 'Supabase (Scalable)';
+        dbColor = 'text-emerald-500';
+        dbIcon = <Database className="w-5 h-5 text-white" />;
+    } else if (process.env.NODE_ENV === 'production') {
+        dbStatus = 'Config Required';
+        dbColor = 'text-red-500';
+        dbIcon = <AlertTriangle className="w-5 h-5 text-white" />;
+    }
+
     const totalStock = products.reduce((acc, p) => acc + (p.stock || 0), 0);
     const totalValue = products.reduce((acc, p) => acc + ((p.price || 0) * (p.stock || 0)), 0);
     const lowStockProducts = products.filter(p => (p.stock || 0) < 10);
@@ -16,23 +36,25 @@ export default async function AdminDashboard() {
     return (
         <div className="space-y-12 pb-20">
             {/* Header Section */}
-            <div>
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
-                    <div>
-                        <h1 className="text-6xl font-heading font-black tracking-tighter text-foreground mb-2">Command Center.</h1>
-                        <p className="text-muted-foreground text-lg font-medium opacity-80">Holistic overview of your luxury eyewear empire.</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h1 className="text-6xl font-heading font-black tracking-tighter text-foreground mb-2">Command Center.</h1>
+                    <p className="text-muted-foreground text-lg font-medium opacity-80">Holistic overview of your luxury eyewear empire.</p>
+                </div>
+                <div className={cn("bg-card border rounded-[2rem] p-6 flex items-center space-x-6 shadow-sm min-w-[300px]", 
+                    dbStatus === 'Config Required' ? "border-red-500/20" : "border-border")}>
+                    <div className={cn("p-4 rounded-2xl shadow-lg shadow-black/10", 
+                        dbStatus === 'Config Required' ? "bg-red-500" : (dbStatus.includes('Scalable') ? "bg-emerald-500" : "bg-amber-500"))}>
+                        {dbIcon}
                     </div>
-                    {!isSupabaseConfigured && (
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center space-x-4 animate-pulse">
-                            <div className="bg-amber-500 p-2 rounded-xl">
-                                <CloudOff className="w-5 h-5 text-white" />
-                            </div>
-                            <div className="text-left">
-                                <p className="text-amber-500 text-[10px] font-black uppercase tracking-widest">Local Demo Mode</p>
-                                <p className="text-amber-700/80 text-xs font-bold leading-tight">Data will not persist in production. Connect Supabase to sync.</p>
-                            </div>
-                        </div>
-                    )}
+                    <div className="text-left">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Database Engine</p>
+                        <h4 className={cn("text-lg font-black tracking-tighter", dbColor)}>{dbStatus}</h4>
+                        <p className="text-[10px] text-muted-foreground font-bold tracking-tight">
+                            {dbStatus === 'Config Required' ? "Connect MongoDB or Supabase Service Key." : 
+                             (dbStatus.includes('Scalable') ? "Production-ready persistence active." : "Ephemeral storage (resets on restart).")}
+                        </p>
+                    </div>
                 </div>
             </div>
 
