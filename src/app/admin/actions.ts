@@ -116,9 +116,9 @@ export async function deleteProductAction(id: string) {
         await deleteProduct(id);
         revalidatePath('/admin/products');
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to delete product:', error);
-        return { success: false, error: 'Failed to delete product' };
+        return { success: false, error: error.message || 'Failed to delete product' };
     }
 }
 
@@ -163,9 +163,9 @@ export async function duplicateProductAction(id: string) {
         await saveProduct(duplicate);
         revalidatePath('/admin/products');
         return { success: true, id: duplicate.id };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to duplicate product:', error);
-        return { success: false, error: 'Failed to duplicate product' };
+        return { success: false, error: error.message || 'Failed to duplicate product' };
     }
 }
 
@@ -176,9 +176,9 @@ export async function bulkDeleteProductsAction(ids: string[]) {
         revalidatePath('/products');
         revalidatePath('/');
         return { success: true };
-    } catch (error) {
-        console.error('Failed to bulk delete:', error);
-        return { success: false, error: 'Failed to delete products' };
+    } catch (error: any) {
+        console.error('Failed to bulk delete products:', error);
+        return { success: false, error: error.message || 'Failed to bulk delete products' };
     }
 }
 
