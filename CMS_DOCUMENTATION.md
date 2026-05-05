@@ -30,6 +30,22 @@ You can export your data to CSV format from:
 - **Inventory Page**: Export full product catalog.
 - **Orders Page**: Export full order history.
 
+## Scalable Backend Setup
+The CMS supports two scalable backends. You can choose the one that fits your workflow best:
+
+### Option 1: MongoDB (Recommended)
+1. Create a cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+2. Get your connection string.
+3. Add it to your Vercel/Local environment variables:
+   - `MONGODB_URI`: your\_mongodb\_connection\_string
+
+### Option 2: Supabase
+1. Create a project on [Supabase](https://supabase.com).
+2. Add the following environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`: your\_project\_url
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: your\_anon\_key
+   - `SUPABASE_SERVICE_ROLE_KEY`: your\_service\_role\_key (Required for Deletions/Updates)
+
 ## API Integration
 For technical integrations, the CMS exposes the following REST endpoints (Requires Session Auth):
 - `GET /api/cms/products`: Fetch all products.

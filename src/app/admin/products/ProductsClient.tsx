@@ -119,12 +119,20 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
         if (!confirm('Delete this product? This cannot be undone.')) return;
         setActionInProgress(id);
         startTransition(async () => {
-            const res = await deleteProductAction(id);
-            if (res.success) {
-                setProducts(prev => prev.filter(p => p.id !== id));
+            try {
+                const res = await deleteProductAction(id);
+                if (res.success) {
+                    setProducts(prev => prev.filter(p => p.id !== id));
+                    // Success feedback would be nice here too
+                } else {
+                    alert(res.error || 'Failed to delete product. Please check your database connection.');
+                }
+            } catch (err) {
+                alert('An unexpected error occurred during deletion.');
+            } finally {
+                setActionInProgress(null);
+                router.refresh();
             }
-            setActionInProgress(null);
-            router.refresh();
         });
     };
 
@@ -133,13 +141,20 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
         if (!confirm(`Delete ${selectedIds.size} products? This cannot be undone.`)) return;
         setActionInProgress('bulk');
         startTransition(async () => {
-            const res = await bulkDeleteProductsAction(Array.from(selectedIds));
-            if (res.success) {
-                setProducts(prev => prev.filter(p => !selectedIds.has(p.id)));
-                setSelectedIds(new Set());
+            try {
+                const res = await bulkDeleteProductsAction(Array.from(selectedIds));
+                if (res.success) {
+                    setProducts(prev => prev.filter(p => !selectedIds.has(p.id)));
+                    setSelectedIds(new Set());
+                } else {
+                    alert(res.error || 'Failed to delete products.');
+                }
+            } catch (err) {
+                alert('An unexpected error occurred during bulk deletion.');
+            } finally {
+                setActionInProgress(null);
+                router.refresh();
             }
-            setActionInProgress(null);
-            router.refresh();
         });
     };
 

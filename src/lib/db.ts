@@ -1,4 +1,5 @@
 import { supabase, getSupabaseAdmin } from './supabase';
+import { getDb } from './mongodb';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -96,6 +97,12 @@ async function deleteLocalProduct(id: string): Promise<void> {
 }
 
 export async function getProducts(): Promise<Product[]> {
+    const db = await getDb();
+    if (db) {
+        const products = await db.collection('products').find({}).sort({ createdAt: -1 }).toArray();
+        return products.map(p => ({ ...p, id: p.id || p._id.toString() })) as any;
+    }
+
     if (!supabase) {
         return getLocalProducts();
     }
@@ -150,6 +157,17 @@ export async function getProductById(id: string): Promise<Product | undefined> {
 }
 
 export async function saveProduct(product: Product): Promise<void> {
+    const db = await getDb();
+    if (db) {
+        const { id, ...data } = product;
+        await db.collection('products').updateOne(
+            { id: product.id },
+            { $set: { ...data, updatedAt: new Date().toISOString() } },
+            { upsert: true }
+        );
+        return;
+    }
+
     if (!supabase) {
         return saveLocalProduct(product);
     }
@@ -228,6 +246,12 @@ export async function decrementStock(productId: string, quantity: number): Promi
 }
 
 export async function deleteProduct(id: string): Promise<void> {
+    const db = await getDb();
+    if (db) {
+        await db.collection('products').deleteOne({ id });
+        return;
+    }
+
     if (!supabase) {
         return deleteLocalProduct(id);
     }
@@ -272,6 +296,12 @@ async function saveLocalOrder(order: Order): Promise<void> {
 }
 
 export async function getOrders(): Promise<Order[]> {
+    const db = await getDb();
+    if (db) {
+        const orders = await db.collection('orders').find({}).sort({ createdAt: -1 }).toArray();
+        return orders.map(o => ({ ...o, id: o.id || o._id.toString() })) as any;
+    }
+
     if (!supabase) {
         const orders = await getLocalOrders();
         return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -327,6 +357,17 @@ export async function getOrder(id: string): Promise<Order | undefined> {
 }
 
 export async function saveOrder(order: Order): Promise<void> {
+    const db = await getDb();
+    if (db) {
+        const { id, ...data } = order;
+        await db.collection('orders').updateOne(
+            { id: order.id },
+            { $set: data },
+            { upsert: true }
+        );
+        return;
+    }
+
     if (!supabase) {
         return saveLocalOrder(order);
     }
