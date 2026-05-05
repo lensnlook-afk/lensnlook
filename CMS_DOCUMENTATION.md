@@ -41,7 +41,9 @@ The CMS supports two scalable backends. You can choose the one that fits your wo
 
 ### Option 2: Supabase
 1. Create a project on [Supabase](https://supabase.com).
-2. Add the following environment variables:
+2. **Setup Database**: Go to the **SQL Editor** in Supabase and paste the contents of `supabase_schema.sql` (found in your project root). Run it to create the necessary tables.
+3. **Setup Storage**: Go to **Storage**, create a new public bucket named `products`.
+4. **Environment Variables**: Add the following to your Vercel/Local settings:
    - `NEXT_PUBLIC_SUPABASE_URL`: your\_project\_url
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: your\_anon\_key
    - `SUPABASE_SERVICE_ROLE_KEY`: your\_service\_role\_key (Required for Deletions/Updates)
